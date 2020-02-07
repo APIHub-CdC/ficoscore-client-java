@@ -1,4 +1,4 @@
-# ficoscore client java
+# ficoscore v2 client java
 
 Modelo estadístico basado en variables contenidas en el historial crediticio del Cliente, calcula un puntaje matemático que mide el riesgo del Cliente de fallar en sus pagos en un lapso de 12 meses a partir del otorgamiento de un crédito.
 
@@ -142,64 +142,68 @@ key_alias=cdc
 key_password=your_super_secure_password
 ```
 
-### Paso 5. Modificar URL
+### Paso 5. Capturar los datos de la petición
 
-Modificar la URL de la petición en ***src/main/java/io/apihub/client/ApiClient*** en la línea 31, como se muestra en el siguiente fragmento de código:
-
-```java
-public class ApiClient {
-
-    private String basePath = "the_url";
-    private Map<String, String> defaultHeaderMap = new HashMap<String, String>();
-    private String tempFolderPath = null;
-    private JSON json;
-```
-
-### Paso 6. Capturar los datos de la petición
-
-En el archivo **FicoScoreApiTest**, que se encuentra en ***src/test/java/io/apihub/client/api*** se deberá modificar el siguiente fragmento de código con los datos correspondientes en los objetos *Persona* y *Domicilio*:
+En el archivo **ApiTest**, que se encuentra en ***src/test/java/io/PLDNaturales/client/api/***. Se deberá modificar los datos de la petición y de la URL para el consumo de la API en ***setBasePath("the_url")***, como se muestra en el siguiente fragmento de código con los datos correspondientes:
 
 ```java
-private final FicoScoreApi api = new FicoScoreApi();
-private ApiClient apiClient;
+private Logger logger = LoggerFactory.getLogger(ApiTest.class.getName());
+
+private final PldNaturalesApi api = new PldNaturalesApi();
+private final SignerInterceptor interceptor = new SignerInterceptor();
+private ApiClient apiClient = null;
 
 @Before()
 public void setUp() {
-	this.apiClient = api.getApiClient();
-	OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-			.readTimeout(120, TimeUnit.SECONDS)
-			.addInterceptor(new SignerInterceptor())
-			.build();
-	apiClient.setHttpClient(okHttpClient);
+	
+		this.apiClient = api.getApiClient();
+    		this.apiClient.setBasePath("the_url");
+        	OkHttpClient insecureClient = ApiClient.getClientNoSSLVerification();
+        	OkHttpClient okHttpClient = insecureClient.newBuilder()
+        			.readTimeout(60, TimeUnit.SECONDS)
+        			.addInterceptor(interceptor)
+        			.build();
+        	apiClient.setHttpClient(okHttpClient);
 }
-@Test
-public void ficoscoreTest() {
-    String xApiKey = "your_api_key";
-    String username = "your_username";
-    String password = "your_password";
-    Persona body = new Persona();
-    body.setPrimerNombre("XXXXXXXX");
-    body.segundoNombre(null);
-    body.setApellidoPaterno("XXXXXXXX");
-    body.setApellidoMaterno("XXXXXXXX");
-    body.setFechaNacimiento("YYYY-MM-DD");
-    body.setRfc("XXXXXXXX");
-    Domicilio dom = new Domicilio();
-    dom.setDireccion("XXXXXXXX");
-    dom.setColonia("XXXXXXXX");
-    dom.setCiudad("XXXXXXXX");
-    dom.codigoPostal("XXXXX");
-    dom.setMunicipio("XXXXXXXX");
-    dom.setEstado(EstadoEnum.DF);
-    body.setDomicilio(dom);
 
-    Response response;
-    try {
-    	response = api.ficoscore(xApiKey, username, password, body);
-		System.out.println(response.toString());
+@Test
+public void getReporteTest() throws ApiException {
+	String xApiKey = "your_api_key";
+	String username = "your_username";
+	String password = "your_password";
+
+    Peticion peticion = new Peticion();
+
+    peticion.setFolio("FOLIO");
+
+    Persona persona = new Persona();
+    persona.setNombres("NOMBRES");
+    persona.setApellidoPaterno("APELLIDO PATERNO");
+    persona.setApellidoMaterno("APELLIDO MATERNO");
+    persona.setFechaNacimiento("dd-mm-yyyy");
+    persona.setRFC("RFC");
+
+    Domicilio domicilio = new Domicilio();
+    domicilio.setDireccion("DIRECCION");
+    domicilio.setColoniaPoblacion("COLONIA POBLACION");
+    domicilio.setCiudad("CIUDAD");
+    domicilio.setCP("CODIGO POSTAL");
+    domicilio.setDelegacionMunicipio("DELEGACION O MUNICIPIO");
+    domicilio.setEstado(CatalogoEstados.CDMX);
+
+    persona.setDomicilio(domicilio);
+
+    peticion.setPersona(persona);
+
+    
+	try {
+        Respuesta response = api.pld(xApiKey, username, password, peticion);
+        Assert.assertTrue(response != null);
+        if(response != null) {
+        	logger.info(response.toString());
+        }
 	} catch (ApiException e) {
-		e.printStackTrace();
-		System.out.println(e.getResponseBody());
+		logger.info(e.getResponseBody());
 	}
 }
 ```
