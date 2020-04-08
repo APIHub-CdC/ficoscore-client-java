@@ -1,4 +1,4 @@
-# ficoscore v2 client java
+# ficoscore-client-java
 
 Modelo estadístico basado en variables contenidas en el historial crediticio del Cliente, calcula un puntaje matemático que mide el riesgo del Cliente de fallar en sus pagos en un lapso de 12 meses a partir del otorgamiento de un crédito.
 
