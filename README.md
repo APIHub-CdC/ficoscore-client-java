@@ -144,12 +144,12 @@ key_password=your_super_secure_password
 
 ### Paso 5. Capturar los datos de la petición
 
-En el archivo **ApiTest**, que se encuentra en ***src/test/java/io/PLDNaturales/client/api/***. Se deberá modificar los datos de la petición y de la URL para el consumo de la API en ***setBasePath("the_url")***, como se muestra en el siguiente fragmento de código con los datos correspondientes:
+En el archivo **ApiTest**, que se encuentra en ***src/test/java/io/ficoscore/client/api/***. Se deberá modificar los datos de la petición y de la URL para el consumo de la API en ***setBasePath("the_url")***, como se muestra en el siguiente fragmento de código con los datos correspondientes:
 
 ```java
 private Logger logger = LoggerFactory.getLogger(ApiTest.class.getName());
 
-private final PldNaturalesApi api = new PldNaturalesApi();
+private final FicoscoreApi api = new FicoscoreApi();
 private final SignerInterceptor interceptor = new SignerInterceptor();
 private ApiClient apiClient = null;
 
@@ -197,7 +197,7 @@ public void getReporteTest() throws ApiException {
 
     
 	try {
-        Respuesta response = api.pld(xApiKey, username, password, peticion);
+        Respuesta response = api.ficoscore(xApiKey, username, password, peticion);
         Assert.assertTrue(response != null);
         if(response != null) {
         	logger.info(response.toString());
